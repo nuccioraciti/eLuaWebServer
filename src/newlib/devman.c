@@ -107,7 +107,7 @@ int dm_get_num_devices()
 int dm_init() 
 {
   dm_register( std_get_desc() );
-#ifndef BUILD_CON_TCP         // we need buffering on stdout for console over TCP
+#if !defined (BUILD_CON_TCP) && !defined (BUILD_WEB_SERVER)      // we need buffering on stdout for console over TCP
   setbuf( stdout, NULL );
 #endif
   return DM_OK;

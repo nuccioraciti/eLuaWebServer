@@ -202,6 +202,7 @@ static const DM_DEVICE romfs_device =
   romfs_write_r,        // write
   romfs_read_r,         // read
   romfs_lseek_r,        // lseek
+  NULL,                 // fstat
   romfs_opendir_r,      // opendir
   romfs_readdir_r,      // readdir
   romfs_closedir_r      // closedir

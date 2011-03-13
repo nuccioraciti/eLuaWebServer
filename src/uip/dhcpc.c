@@ -1,5 +1,5 @@
 #include "platform_conf.h"
-#if defined(BUILD_UIP) && defined(BUILD_DHCPC)
+#if defined(BUILD_UIP) || defined(BUILD_WEB_SERVER) && defined(BUILD_DHCPC)
 /*
  * Copyright (c) 2005, Swedish Institute of Computer Science
  * All rights reserved.

@@ -39,6 +39,9 @@ LUALIB_API int ( luaopen_bit )( lua_State *L );
 #define AUXLIB_NET      "net"
 LUALIB_API int ( luaopen_net )( lua_State *L );
 
+#define AUXLIB_JSON      "json"
+LUALIB_API int ( luaopen_json )( lua_State *L );
+
 #define AUXLIB_CPU      "cpu"
 LUALIB_API int ( luaopen_cpu )( lua_State* L );
 

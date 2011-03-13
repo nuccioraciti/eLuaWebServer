@@ -173,6 +173,7 @@ static const DM_DEVICE rfs_device =
   rfs_write_r,          // write
   rfs_read_r,           // read
   rfs_lseek_r,          // lseek
+  NULL,          // fstat
   rfs_opendir_r,        // opendir
   rfs_readdir_r,        // readdir
   rfs_closedir_r        // closedir

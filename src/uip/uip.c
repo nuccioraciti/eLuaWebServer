@@ -1,5 +1,5 @@
 #include "platform_conf.h"
-#ifdef BUILD_UIP
+#if defined(BUILD_UIP) || defined(BUILD_WEB_SERVER)
 
 #define DEBUG_PRINTF(...) /*printf(__VA_ARGS__)*/
 

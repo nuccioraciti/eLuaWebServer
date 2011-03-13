@@ -91,6 +91,7 @@ static const DM_DEVICE std_device =
   std_write,            // write
   std_read,             // read
   NULL,                 // lseek
+  NULL,                 // fstat
   NULL,                 // opendir
   NULL,                 // readdir
   NULL                  // closedir

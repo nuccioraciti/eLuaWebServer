@@ -255,6 +255,7 @@ static DM_DEVICE semifs_device =
   semifs_write_r,        // write
   semifs_read_r,         // read
   semifs_lseek_r,        // lseek
+  NULL,                 // fstat
   semifs_opendir_r,      // opendir
   semifs_readdir_r,      // readdir
   semifs_closedir_r       // closedir

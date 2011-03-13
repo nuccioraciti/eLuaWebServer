@@ -208,9 +208,11 @@ void cmn_platform_init()
   platform_uart_set_buffer( CON_UART_ID, CON_BUF_SIZE );
 #endif // #if defined( CON_UART_ID ) && CON_UART_ID < SERMUX_SERVICE_ID_FIRST
 
+#ifndef BUILD_WEB_SERVER
   // Set the send/recv functions                          
   std_set_send_func( uart_send );
   std_set_get_func( uart_recv );  
+#endif
 
 #ifdef BUILD_XMODEM  
   // Initialize XMODEM

@@ -14,6 +14,9 @@
 #include "term.h"
 #include "platform_conf.h"
 #include "elua_rfs.h"
+#ifdef BUILD_WEB_SERVER
+#include "httpd.h"
+#endif
 #ifdef ELUA_SIMULATOR
 #include "hostif.h"
 #endif
@@ -77,8 +80,10 @@ void boot_rpc( void )
 
 int main( void )
 {
+#ifndef BUILD_WEB_SERVER
   int i;
   FILE* fp;
+#endif
 
   // Initialize platform first
   if( platform_init() != PLATFORM_OK )
@@ -101,6 +106,12 @@ int main( void )
 
   // Register the remote filesystem
   dm_register( remotefs_init() );
+
+#ifdef BUILD_WEB_SERVER
+  while(1)
+    httpd_uip_mainloop();
+
+#else
 
   // Search for autorun files in the defined order and execute the 1st if found
   for( i = 0; i < sizeof( boot_order ) / sizeof( *boot_order ); i++ )
@@ -134,5 +145,6 @@ int main( void )
   return 0;
 #else
   while( 1 );
+#endif
 #endif
 }

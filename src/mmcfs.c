@@ -12,6 +12,7 @@
 #include "ff.h"
 #include "diskio.h"
 #include <fcntl.h>
+#include <sys/stat.h>
 
 #define MMCFS_MAX_FDS   4
 static FIL mmcfs_fd_table[ MMCFS_MAX_FDS ];
@@ -167,6 +168,13 @@ static off_t mmcfs_lseek_r( struct _reent *r, int fd, off_t off, int whence )
   return newpos;
 }
 
+// fstat
+static int mmcfs_fstat_r ( struct _reent *r, int fd, struct stat *st )
+{
+  FIL* pFile = mmcfs_fd_table + fd;
+  st->st_size = pFile->fsize;
+  return 0;
+}
 // opendir
 static DIR mmc_dir;
 static void* mmcfs_opendir_r( struct _reent *r, const char* dname )
@@ -228,6 +236,7 @@ static DM_DEVICE mmcfs_device =
   mmcfs_write_r,        // write
   mmcfs_read_r,         // read
   mmcfs_lseek_r,        // lseek
+  mmcfs_fstat_r,        // lseek
   mmcfs_opendir_r,      // opendir
   mmcfs_readdir_r,      // readdir
   mmcfs_closedir_r      // closedir

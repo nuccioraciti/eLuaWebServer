@@ -38,15 +38,15 @@
 
 // For DHCP we need to have TCP/IP support
 #ifdef BUILD_DHCPC
-  #ifndef BUILD_UIP
+  #if !defined(BUILD_UIP) &&  !defined(BUILD_WEB_SERVER)
   #error "DHCP client requires TCP/IP support (enable BUILD_UIP in platform_conf.h)"
   #endif // #ifndef BUILD_UIP
 #endif // #ifdef BUILD_DHCPC
 
 // For DNS we need to have TCP/IP support
 #ifdef BUILD_DNS
-  #ifndef BUILD_UIP
-  #error "DNS resolver requires TCP/IP support (enable BUILD_UIP in platform_conf.h)"
+  #if !defined(BUILD_UIP) &&  !defined(BUILD_WEB_SERVER)
+  //#error "DNS resolver requires TCP/IP support (enable BUILD_UIP in platform_conf.h)"
   #endif // #ifndef BUILD_UIP
 #endif // #ifdef BUILD_DNS
 

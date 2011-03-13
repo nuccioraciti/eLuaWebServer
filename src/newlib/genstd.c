@@ -10,7 +10,11 @@
 #include <errno.h>
 #include <ctype.h>
 #include "utils.h"
+#ifdef BUILD_WEB_SERVER
+#include "httpd.h"
+#endif
 
+#ifndef BUILD_WEB_SERVER
 static p_std_send_char std_send_char_func;
 static p_std_get_char std_get_char_func;
 int std_prev_char = -1;
@@ -116,6 +120,60 @@ static _ssize_t std_write( struct _reent *r, int fd, const void* vptr, size_t le
   }
   return len;
 }
+#endif
+
+#ifdef BUILD_WEB_SERVER
+
+// 'write'
+static _ssize_t uip_write( struct _reent *r, int fd, const void* vptr, size_t len )
+{
+  const char* ptr = ( const char* )vptr;
+  struct httpd_state *s;
+  size_t i;
+
+  // Check file number
+  if( ( fd < DM_STDIN_NUM ) || ( fd > DM_STDERR_NUM ) )
+  {
+    r->_errno = EBADF;
+    return -1;
+  }
+  if( ( fd != DM_STDOUT_NUM ) && ( fd != DM_STDERR_NUM ) )
+  {
+    r->_errno = EINVAL;
+    return -1;
+  }
+
+  if (fd == DM_STDERR_NUM)
+  {
+	  http_uart_send_str(ptr, len);
+	  return len;
+  }
+
+  s = get_httpd_state_struct();
+
+  assert((s->write_buffer_len + len) < WRITE_BUFFER_SIZE);
+
+  for(i=0; i < len; i++)
+  {
+	if(ptr[i] != '\n')
+	  s->write_buffer[s->write_buffer_len + i] = ptr[i];
+	else
+	  len--;
+  }
+
+  s->write_buffer_len += len;
+
+  return len;
+}
+
+// 'read'
+static _ssize_t null_read( struct _reent *r, int fd, void* vptr, size_t len )
+{
+  return 0;
+}
+#endif
+
+#ifndef BUILD_WEB_SERVER
 
 // Set send/recv functions
 void std_set_send_func( p_std_send_char pfunc )
@@ -137,10 +195,28 @@ static const DM_DEVICE std_device =
   std_write,            // write
   std_read,             // read
   NULL,                 // lseek
+  NULL,                 // fstat
   NULL,                 // opendir
   NULL,                 // readdir
   NULL                  // closedir
 };
+#endif
+#ifdef BUILD_WEB_SERVER
+// Our UIP (HTTP) device descriptor structure
+static const DM_DEVICE std_device =
+{
+  STD_DEV_NAME,
+  NULL,                 // open
+  NULL,                 // close
+  uip_write,            // write
+  null_read,            // read
+  NULL,                 // lseek
+  NULL,                 // fstat
+  NULL,                 // opendir
+  NULL,                 // readdir
+  NULL                  // closedir
+};
+#endif
 
 const DM_DEVICE* std_get_desc()
 {

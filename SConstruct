@@ -429,6 +429,11 @@ if not GetOption( 'help' ):
   # Newlib related files
   newlib_files = " src/newlib/devman.c src/newlib/stubs.c src/newlib/genstd.c src/newlib/stdtcp.c"
 
+  # WEB_SERVER files
+  web_files = "httpd.c httpd-fs.c httpd-uip.c httpd-strings.c luajson_lib.c"
+  web_files = " " + " ".join( [ "src/webserver/%s" % name for name in web_files.split() ] )
+  comp.Append(CPPPATH = ['src/webserver'])
+
   # UIP files
   uip_files = "uip_arp.c uip.c uiplib.c dhcpc.c psock.c resolv.c"
   uip_files = " src/elua_uip.c " + " ".join( [ "src/uip/%s" % name for name in uip_files.split() ] )
@@ -448,6 +453,9 @@ if not GetOption( 'help' ):
 
   # Optimizer flags (speed or size)
   comp.Append(CCFLAGS = ['-Os','-fomit-frame-pointer'])
+
+  #comp.Append(CCFLAGS = ['-O0','-g3'])
+
   #opt += " -ffreestanding"
   #opt += " -fconserve-stack" # conserve stack at potential speed cost, >=GCC4.4
 
@@ -458,7 +466,7 @@ if not GetOption( 'help' ):
   execfile( "src/platform/%s/conf.py" % platform )
 
   # Complete file list
-  source_files = Split( app_files + specific_files + newlib_files + uip_files + lua_full_files + module_files + rfs_files )
+  source_files = Split( app_files + specific_files + newlib_files + uip_files + lua_full_files + module_files + rfs_files + web_files)
   
   comp = conf.Finish()
 

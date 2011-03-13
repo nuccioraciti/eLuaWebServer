@@ -5,7 +5,6 @@
 #include <string.h>
 #include <sys/stat.h>
 #include <stdio.h>
-#include <stdarg.h>
 #include <unistd.h>
 #include "devman.h"
 #include "ioctl.h"
@@ -14,6 +13,7 @@
 #include "genstd.h"
 #include "utils.h"
 #include "salloc.h"
+#include <sys/stat.h>
 
 #ifdef USE_MULTIPLE_ALLOCATOR
 #include "dlmalloc.h"
@@ -118,13 +118,23 @@ int _close_r( struct _reent *r, int file )
 // _fstat_r (not implemented)
 int _fstat_r( struct _reent *r, int file, struct stat *st )
 {
+  const DM_DEVICE* pdev;
+
   if( ( file >= DM_STDIN_NUM ) && ( file <= DM_STDERR_NUM ) )
   {
     st->st_mode = S_IFCHR;
     return 0;
   }
+
+  // Find device, check close function
+  pdev = dm_get_device_at( DM_GET_DEVID( file ) );
+  if( pdev->p_fstat_r == NULL )
+  {
   r->_errno = ENOSYS;
   return -1;
+  }
+  // And call the close function
+  return pdev->p_fstat_r( r, DM_GET_FD( file ), st );
 }
 
 // *****************************************************************************
@@ -375,7 +385,7 @@ const DM_DEVICE* std_get_desc()
 #endif // #if !defined( BUILD_CON_GENERIC ) && !defined( BUILD_CON_TCP )
 
 // ****************************************************************************
-// memcpy is broken on AVR32's Newlib, so impolement a simple version here
+// memcpy is broken on AVR32's Newlib, so implement a simple version here
 // same goes for strcmp apparently
 #ifdef FORAVR32
 void* memcpy( void *dst, const void* src, size_t len )

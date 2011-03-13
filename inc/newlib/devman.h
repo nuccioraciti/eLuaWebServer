@@ -6,6 +6,7 @@
 #include "type.h"
 #include <reent.h>
 #include <unistd.h>
+#include <sys/stat.h>
 
 // Maximum number of devices in the system
 #define DM_MAX_DEVICES        16
@@ -49,6 +50,7 @@ typedef struct
   _ssize_t ( *p_write_r ) ( struct _reent *r, int fd, const void *ptr, size_t len );
   _ssize_t ( *p_read_r )( struct _reent *r, int fd, void *ptr, size_t len );  
   off_t ( *p_lseek_r )( struct _reent *r, int fd, off_t off, int whence );
+  int ( *p_fstat_r )( struct _reent *r, int fd, struct stat *buf );
   void* ( *p_opendir_r )( struct _reent *r, const char* name );
   struct dm_dirent* ( *p_readdir_r )( struct _reent *r, void *dir );  
   int ( *p_closedir_r )( struct _reent *r, void* dir );  
