@@ -1,12 +1,21 @@
 ## eLua Web Server for microcontrollers (just AVR32 for now)
 
-The ultimate goal of this project is to be able to manage through a Web-browser, a cheap hardware in a very simple way, without expensive hardware for programming or proprietary softwares.
-This is the reason I chose the "Mizar32" board, it is economic and thanks to "eLuaWebServer"  it can be programmed (I hope) by simply putting files inside his SDCard.
+http://wiki.eluaproject.net/eLuaWebServer
 
-It currently has been tested on a ATEVK100 board using  this command line for the building:
-scons target=lualong allocator=newlib board=ATEVK1100 optram=0
+Simply writting and putting some ".html" and ".lua" files inside the SDcard, is possible to manage the micro-controller and our hardware using eLua in order to create dynamic pages.
 
-So enjoy with eLuaWebServer, and many thanks to the eLua development team.
+Using "AJAX" (http://en.wikipedia.org/wiki/Ajax_%28programming%29) techniques the results will be great. 
+The project also include an eLua library for manage "JSON" (http://en.wikipedia.org/wiki/Json)  data.
+
+You can get project sources here: https://github.com/nuccioraciti/eLuaWebServer
+
+It was currently tested on a ATEVK100 board using this Linux command line for the building:
+
+nuccio@linux$ scons target=lualong allocator=newlib board=ATEVK1100 optram=0
+
+A little demo (including AJAX test) is present here as file system to put inside the SDCard.
+
+So enjoy with eLuaWebServer, thank you for testing, improving and leaving your feedback for it.
 
 <raciti.nuccio(AT)gmail.com> <Mizar32@http://www.simplemachines.it >
 
