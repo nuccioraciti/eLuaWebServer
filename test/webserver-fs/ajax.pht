@@ -1,0 +1,101 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01//EN" "http://www.w3.org/TR/html4/strict.dtd">
+<html><head><title>Mizar32 webserver AJAX test</title>
+</head><?lua t=0;h=0;l=0 --global variables initialised here ?>
+<body bgcolor="white" onload="load()">
+<table border=0 cellpadding=4 cellspacing=4><tr><td valign="top" align="right">
+<h1>Mizar32&nbsp;</h1>
+
+</td><td valign="top" align="left">
+<script type="text/javascript">
+/* This is the uncompressed version of the script in httpd-fs/sensordata.shtml */
+var start;
+
+i = new Image(50,60)
+i.src = "spin.gif"
+
+function load() {
+  var img = document.getElementById("spin");
+  img.innerHTML = '&nbsp;';
+  loadData();
+}
+
+function loadData() {
+  var r;
+  try { r = new XMLHttpRequest(); }
+  catch(e) {
+    try { r = new ActiveXObject("Msxml2.XMLHTTP"); }
+    catch(e) {
+      try { r = new ActiveXObject("Microsoft.XMLHTTP"); }
+      catch(e) {
+        alert("Your browser does not support AJAX!");
+        return false;
+      }
+    }
+  }
+  r.onreadystatechange = function() {
+    if(r.readyState == 1) {
+      var img = document.getElementById("spin");
+      img.innerHTML = '<img src="spin.gif">';
+    }
+    if(r.readyState == 4) {
+      var img = document.getElementById("spin");
+      img.innerHTML = 'took '  +
+                      ((new Date()).getTime() -  start.getTime()) / 1000 +
+                      ' seconds';
+      eval(r.responseText);
+     }
+   }
+  start = new Date();
+  r.open("GET", "/sensor.lua", true);
+  r.send(null);
+  setTimeout("loadData()",1000);
+
+}
+
+function e(el) {
+  d = document;
+  if(d.getElementById) {
+    return d.getElementById(el);
+  } else if (d.all) {
+    return d.all[el];
+  }
+}
+function s(el,n,max,text) {
+  e(el).innerHTML = '<table width=504 border=0 cellpadding=1 cellspacing=0>'+
+                    '<tr><td width=200>' +  text + '</td>' +
+		    '<td width=' + (300*n/max) + ' bgcolor="gray">&nbsp;</td>' +
+		    '<td width=' + (300-300*n/max) + ' bgcolor="lightgray">&nbsp;</td>' +
+		    '</table>';
+}
+function dc(n,d) {
+  return n.toFixed(d);
+}
+function t(m) {
+  n = dc(-39.6+0.01*m, 1);
+  s('temp',n,40,'Temperature '+n+' &deg;C');
+}
+function h(m) {
+  n = dc(-4+0.0405*m - 2.8e-6*(m*m), 2);
+  s('hum',n,100,'Humidity '+n+'%');
+}
+function l(m) {
+  n = dc(.7629394375*m, 0);
+  s('l',n,200,'Light '+n);
+}
+</script>
+<h1>Board:<? lua print(pd.board()) ?> </h1>
+<a onclick="loadSensordata();" href="#">Reload</a>
+<span id="spin"> </span>
+<h2>Environment</h2>
+<div id="temp"></div>
+<div id="hum"></div>
+<h2>Light</h2>
+<div id="l"></div>
+</table>
+</body>
+</html>
+
+
+
+
+
