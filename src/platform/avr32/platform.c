@@ -669,8 +669,6 @@ int platform_cpu_get_global_interrupts()
 {
   return Is_global_interrupt_enabled();
 }
-
-
 // ****************************************************************************
 // Network support
 

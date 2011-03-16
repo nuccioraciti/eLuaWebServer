@@ -690,6 +690,7 @@ static unsigned long ulReadMDIO(volatile avr32_macb_t *macb, unsigned short usAd
 static void vWriteMDIO(volatile avr32_macb_t *macb, unsigned short usAddress, unsigned short usValue)
 {
   unsigned long status;
+  u16 timeout = 0;
 
   // initiate transaction : enable management port
   macb->ncr |= AVR32_MACB_NCR_MPE_MASK;
@@ -703,7 +704,7 @@ static void vWriteMDIO(volatile avr32_macb_t *macb, unsigned short usAddress, un
   // wait for PHY to be ready
   do {
     status = macb->nsr;
-  } while (!(status & AVR32_MACB_NSR_IDLE_MASK));
+  } while (!(status & AVR32_MACB_NSR_IDLE_MASK) && (timeout++ < TIMEOUT));
   // disable management port
   macb->ncr &= ~AVR32_MACB_NCR_MPE_MASK;
 }
@@ -797,7 +798,6 @@ __attribute__((__interrupt__)) void vMACB_ISR(void)
   {
     // A frame has been received, signal the IP task so it can process
     // the Rx descriptors.
-    //httpd_uip_mainloop();
     AVR32_MACB.rsr =  AVR32_MACB_REC_MASK;  // Clear
     AVR32_MACB.rsr; // Read to force the previous write
   }
