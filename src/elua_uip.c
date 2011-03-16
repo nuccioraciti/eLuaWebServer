@@ -276,7 +276,7 @@ volatile static elua_net_ip elua_uip_accept_remote;
 
 void elua_uip_appcall()
 {
-  struct elua_uip_state *s;
+  volatile struct elua_uip_state *s;
   elua_net_size temp;
   int sockno;
   
