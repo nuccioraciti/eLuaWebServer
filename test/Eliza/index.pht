@@ -1,0 +1,96 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01//EN" "http://www.w3.org/TR/html4/strict.dtd">
+<html><head><title>Welcome to an eLua Example</title>
+</head><body onload="load()">
+<p align="center"><big><b>Eliza, computer therapist</b></big><br></p>
+<br>
+<div style="text-align: left;">
+This is a implementation of the classic ELIZA in pure elua.
+This code is based on Kein-Hong Man's ELIZA for Scite 
+( http://lua-users.org/wiki/SciteElizaClassic)
+sligtly modified to be used as a AJAX application.
+<br>
+<p>ELIZA emulates a Rogerian psychotherapist.</p>
+
+<p>ELIZA has almost no intelligence whatsoever, only
+   tricks like string substitution and canned responses
+   based on keywords. Yet when the original ELIZA first
+   appeared in the 60's, some people actually mistook her for
+   human. The illusion of intelligence works best, however, 
+   if you limit your conversation to talking about yourself 
+   and your life.</p>
+
+<br>
+
+<script type="text/javascript">
+var buffer = ""; 
+var counter = 0;
+
+function timeout() {
+  counter++;
+  if (counter == 30) {
+    loadXMLDoc("case_noinput");
+  }else  if (counter > 45) {
+    counter = 0;
+    loadXMLDoc("case_noinput1");
+  }
+  setTimeout("timeout()",1000); 
+}
+
+
+function load() {
+  loadXMLDoc("case_start");
+  setTimeout("timeout()",1000);
+}
+
+function loadXMLDoc(str)
+{
+var xmlhttp;
+var ran=Math.floor(Math.random()*10) + 1 ;
+  if (window.XMLHttpRequest) {// code for IE7+, Firefox, Chrome, Opera, Safari
+    xmlhttp=new XMLHttpRequest();
+  }  else  {// code for IE6, IE5
+    xmlhttp=new ActiveXObject("Microsoft.XMLHTTP");
+  }
+  xmlhttp.onreadystatechange=function() {
+    if (xmlhttp.readyState==4 && xmlhttp.status==200) {
+      buffer = buffer + "> "+ xmlhttp.responseText + "\n";
+      document.Eliza.log.value = buffer ;
+    }
+  }
+  if (!str.length) { 
+    str="case_empty";  
+  }
+  str.replace("?","");
+  xmlhttp.open("GET","/ajax_eliza.lua?p="+str+"&r=" + ran,true);
+  xmlhttp.send();
+ return false;
+}
+
+function dialog(){
+  var Input = document.Eliza.input.value;
+  document.Eliza.input.value = "";   
+  buffer = buffer + "* " + Input + "\n";
+  if (buffer.length > 200) {
+      buffer = buffer.slice(buffer.indexOf("*",50));
+  }
+  loadXMLDoc(Input);
+  counter=0;
+  return false;
+}
+
+</script>
+<table cellspacing="0" cellpadding="2" border="0" align="left" class="neurotoy">
+	<tr><th bgcolor=#000000 align="left"> <font color="#FFFFFF">Talk to Eliza</Font>
+	</td></tr>
+  	<tr><td bgcolor=#0097FF>
+    	<form name="Eliza" onSubmit="return dialog();">
+
+      	<textarea rows=14 cols=55 name="log"></textarea>
+      	<center><font color=#000000><br>Input:</font>
+	<INPUT TYPE="text" size = 50 NAME="input" VALUE=""></center>
+    	</form>
+  	</td></tr>
+</table>
+</body>
+</html>
+
