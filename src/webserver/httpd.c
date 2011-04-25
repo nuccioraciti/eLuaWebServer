@@ -315,7 +315,8 @@ PT_THREAD(handle_input(struct httpd_state *s))
   }
 
   if(s->inputbuf[1] == ISO_space) {
-    strncpy(s->filename, http_index_pht, sizeof(s->filename));
+	memset(s->filename,0,sizeof(s->filename));
+    strncpy(s->filename, http_index_pht, sizeof(http_index_pht));
   } else {
     s->inputbuf[PSOCK_DATALEN(&s->sin) - 1] = 0;
     params = strchr(s->inputbuf, ISO_question);
@@ -387,6 +388,8 @@ httpd_appcall(void)
     PT_INIT(&s->outputpt);
     s->state = STATE_WAITING;
     s->timer = 0;
+    s->filename[0]=0;
+    s->len=0;
     handle_connection(s);
   } else if(s != NULL) {
     if(uip_poll()) {
@@ -450,9 +453,12 @@ PT_THREAD(http_output_elua(struct httpd_state *s))
 static
 int http_run_elua (struct httpd_state *s, char *data, int len)
 {
+#define getn(L,n) (luaL_checktype(L, n, LUA_TTABLE), luaL_getn(L, n))
   int error;
   int i,c;
+  int tableIdx;
   char str[20];
+  char pair = FALSE;
 
   /* clean the elua output buffer */
   s->write_buffer_len = 0;
@@ -465,8 +471,8 @@ int http_run_elua (struct httpd_state *s, char *data, int len)
 	s->new_pht_page = FALSE;
   }
 
+
   if (s->L == NULL) {
-    char pair = FALSE;
     s->L = lua_open();   /* opens Lua */
 
     if (s->L == NULL) {
@@ -484,6 +490,26 @@ int http_run_elua (struct httpd_state *s, char *data, int len)
     // reset table on stack
     lua_pop(s->L, 1);                                         // pop table (nil value) from stack
     lua_getfield(s->L, LUA_GLOBALSINDEX, HTTP_PARAMS_TABLE);  // push table onto stack
+
+    fprintf(stderr,"remote ip: %d.%d.%d.%d [%d]\n", uip_ipaddr1(s->ripaddr), uip_ipaddr2(s->ripaddr),
+                                             uip_ipaddr3(s->ripaddr), uip_ipaddr4(s->ripaddr),s->http_connection_nr);
+  } else {
+    fprintf(stderr,"         : %d.%d.%d.%d [%d]\n", uip_ipaddr1(s->ripaddr), uip_ipaddr2(s->ripaddr),
+    			                               uip_ipaddr3(s->ripaddr), uip_ipaddr4(s->ripaddr),s->http_connection_nr);
+  }
+
+   lua_getglobal(s->L, HTTP_PARAMS_TABLE);
+   tableIdx =  lua_gettop(s->L);
+   c = getn(s->L, tableIdx);
+
+   if(c > 0 ) {
+   lua_rawgeti(s->L, tableIdx, 1);  /* push first element */
+    /* shift elements left */
+    for (i = 2; i < c; i++) {
+      lua_rawgeti(s->L, tableIdx, i);
+      lua_rawseti(s->L, tableIdx, i-1);
+    }
+   }
 
     if(s->http_params[0] != 0)
     {
@@ -522,12 +548,7 @@ int http_run_elua (struct httpd_state *s, char *data, int len)
       }
       lua_pop(s->L, 1);                     // pop table from stack
     }
-    fprintf(stderr,"remote ip: %d.%d.%d.%d [%d]\n", uip_ipaddr1(s->ripaddr), uip_ipaddr2(s->ripaddr),
-                                             uip_ipaddr3(s->ripaddr), uip_ipaddr4(s->ripaddr),s->http_connection_nr);
-  } else {
-    fprintf(stderr,"         : %d.%d.%d.%d [%d]\n", uip_ipaddr1(s->ripaddr), uip_ipaddr2(s->ripaddr),
-    			                               uip_ipaddr3(s->ripaddr), uip_ipaddr4(s->ripaddr),s->http_connection_nr);
-  }
+
   error = luaL_loadbuffer(s->L, data, len, "tag") ||  lua_pcall(s->L, 0, 0, 0);
 
   if (error)

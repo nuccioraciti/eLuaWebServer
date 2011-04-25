@@ -59,8 +59,9 @@
 
 #define ONE_KB (1024)
 #define FILE_HUGE_SIZE   (ONE_KB*300)
-#define FILE_CACHE_SIZE  (ONE_KB*10)
-#define FILE_NAME_SIZE   10
+//#define FILE_CACHE_SIZE  (ONE_KB*10)
+#define FILE_CACHE_SIZE  0
+#define FILE_NAME_MAX_SIZE   10
 #define FILE_CACHE_NR    10
 #define FILE_NAME_PREFIX "/mmc"
 
@@ -68,7 +69,7 @@ typedef struct  {
   char *huge;
   struct {
 	  char         *data;
-	  char         name[FILE_NAME_SIZE];
+	  char         name[FILE_NAME_MAX_SIZE];
 	  _ssize_t     len;
   } cache[FILE_CACHE_NR];
 } file_fs_t;
@@ -132,11 +133,11 @@ httpd_fs_search_name(const char *name)
 }
 
 /*-----------------------------------------------------------------------------------*/
-int
-httpd_fs_open(const char *name, struct httpd_fs_file *file)
+
+int httpd_fs_open(const char *name, struct httpd_fs_file *file)
 {
   FILE                             *fd;
-  char                             fullpath[FILE_NAME_SIZE+sizeof(FILE_NAME_PREFIX)] = FILE_NAME_PREFIX;
+  char                             fullpath[sizeof(FILE_NAME_PREFIX)+FILE_NAME_MAX_SIZE] = FILE_NAME_PREFIX;
   struct stat                      fstat_buf;
   struct                           _reent r; /* it needs a better solution */
   int                              index;
@@ -165,6 +166,7 @@ httpd_fs_open(const char *name, struct httpd_fs_file *file)
 
   if(_fstat_r(&r,fileno(fd), &fstat_buf))
   {
+    	  file->len=0; 
     fprintf(stderr, "httpd_fs_open(): fstat error in %s.\n",name);
 	fclose(fd);
 	return 0;
